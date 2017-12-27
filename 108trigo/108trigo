@@ -1,0 +1,291 @@
+#!/usr/bin/env ruby
+
+def identity (rang)
+  res = Array.new(rang) { Array.new(rang) }
+  for i in 0...rang
+    for l in 0...rang
+      res[i][l] = 0
+      res[i][l] = 1 if (i == l)
+    end
+  end
+  return res
+end
+
+def empty (rang)
+  res = Array.new(rang) { Array.new(rang) }
+  for i in 0...rang
+    for l in 0...rang
+      res[i][l] = 0
+    end
+  end
+  return res
+end
+
+class Integer
+  def fact
+    self.downto(1).inject(:*)
+  end
+end
+
+class Object
+  def is_num?
+    self.to_f.to_s == self.to_s || self.to_i.to_s == self.to_s
+  end
+end
+
+class Array
+  def to_matrix
+    rang = Math.sqrt(self.length).to_i
+    mat = each_slice(rang).to_a
+  end
+
+  def /(m)
+    case (m)
+    when Numeric
+      res = Array.new(self.length) { Array.new(self[0].length) }
+      for i in 0...self.length
+        for l in 0...self.length
+          res[i][l] = self[i][l] / m
+        end
+      end
+      return res
+    end
+  end
+
+  def +(m)
+    case (m)
+    when Array
+      res = Array.new(self.length) { Array.new(self[0].length) }
+      for i in 0...self.length
+        for l in 0...self.length
+          res[i][l] = 0
+        end
+      end
+      for i in 0...self.length
+        for j in 0...self.length
+          res[i][j] += self[i][j] + m[i][j]
+        end
+      end
+      return res
+    end
+  end
+
+  def -(m)
+    case (m)
+    when Array
+      res = Array.new(self.length) { Array.new(self[0].length) }
+      for i in 0...self.length
+        for l in 0...self.length
+          res[i][l] = 0
+        end
+      end
+      for i in 0...self.length
+        for j in 0...self.length
+          res[i][j] += self[i][j] - m[i][j]
+        end
+      end
+      return res
+    end
+  end
+
+  def *(m)
+    case (m)
+    when Array
+      res = Array.new(self.length) { Array.new(self[0].length) }
+      for i in 0...self.length
+        for l in 0...self.length
+          res[i][l] = 0
+        end
+      end
+      for i in 0...self.length
+        for l in 0...self.length
+          for j in 0...self.length
+            res[i][l] += self[j][l] * m[i][j]
+          end
+        end
+      end
+      return res
+    when Numeric
+      res = Array.new(self.length) { Array.new(self[0].length) }
+      for i in 0...self.length
+        for l in 0...self.length
+          res[i][l] = self[i][l] * m
+        end
+      end
+      return res
+    end
+  end
+
+  def **(p)
+    res = Array.new(self.length) { Array.new(self[0].length) }
+    tmp = Array.new(self.length) { Array.new(self[0].length) }
+    for i in 0...self.length
+      for l in 0...self.length
+        res[i][l] = self[i][l]
+        tmp[i][l] = self[i][l]
+      end
+    end
+    for i in 1...p
+      res = tmp * res
+    end
+    return res
+  end
+  def repr
+    lol = ""
+    i = 1
+    size = self.length
+    self.each { |n| n.each { |x| lol += (i % size != 0) ? "%.2f\t" % x : "%.2f" % x; i += 1 }; lol = lol + "\n" }
+    return lol
+  end
+end
+
+def cosinus(tab)
+  x = 0
+  res = identity(tab.length)
+  for i in 0..40
+    x += 2
+    if i % 2 != 0
+      res = res + ((tab ** x) / x.fact)
+    else
+      res = res - ((tab ** x) / x.fact)
+    end
+  end
+  return res.repr
+end
+
+def cosinush(tab)
+  x = 0
+  res = identity(tab.length)
+  for i in 0..40
+    x += 2
+    res = res + ((tab ** x) / x.fact)
+  end
+  return res.repr
+end
+
+def sinus(tab)
+  x = 1
+  res = tab
+  for i in 0..40
+    x += 2
+    if i % 2 != 0
+      res = res + ((tab ** x) / x.fact)
+    else
+      res = res - ((tab ** x) / x.fact)
+    end
+  end
+  return res.repr
+end
+
+def ln_min(tab)
+  x = 1
+  res = empty(tab.length) - tab
+  for i in 0..40
+    x += 1
+    res = res - ((tab ** x) / x)
+  end
+  return res.repr
+end
+
+def ln_plus(tab)
+  x = 1
+  res = tab
+  for i in 0..40
+    x += 1
+    if (i % 2 == 0)
+      res = res - ((tab ** x) / x)
+    else
+      res = res + ((tab ** x) / x)
+    end
+  end
+  return res.repr
+end
+
+def inverse_min(tab)
+  x = 0
+  res = identity(tab.length)
+  for i in 0..40
+    x += 1
+    res = res + (tab ** x)
+  end
+  return res.repr
+end
+
+def inverse_plus(tab)
+  x = 0
+  res = identity(tab.length)
+  for i in 0..40
+    x += 1
+    if (i % 2 == 0)
+      res = res - (tab ** x)
+    else
+      res = res + (tab ** x)
+    end
+  end
+  return res.repr
+end
+
+def sinush(tab)
+  x = 1
+  res = tab
+  for i in 0..40
+    x += 2
+    res = res + ((tab ** x) / x.fact)
+  end
+  return res.repr
+end
+
+def expo(tab)
+  x = 0
+  res = identity(tab.length)
+  for i in 0..40
+    x += 1
+    res = res + (tab ** x) / x.fact
+  end
+  return res.repr
+end
+
+ARGV << '-h' if ARGV.empty?
+if ARGV[0] == '-h'
+  STDERR.puts "USAGE"
+  STDERR.puts "\t./108trigo fun a0 a1 a2...\n"
+  STDERR.puts "DESCRIPTION"
+  STDERR.puts "\tfun\tfunction to be applied, among at least \"EXP\", \"COS\", \"SIN\", \"COSH\", \"SINH\", \"LN+\", \"LN-\", \"1/X+\" and \"1/X-\""
+  STDERR.puts "\tai\tcoeficients of the matrix"
+  exit 84
+elsif Math.sqrt(ARGV.length - 1).to_i != Math.sqrt(ARGV.length - 1).to_f
+  STDERR.puts "Wrong number of coeficients, this isn't a square matrix"
+  exit 84
+else
+  ARGV[1...ARGV.length].each {|n|
+    if !n.is_num?
+      STDERR.puts "Wrong argument : #{n} isn't a number"
+      exit 84
+    end
+  }
+  tab = ARGV[1...ARGV.length].map(&:to_f)
+  puts case ARGV[0]
+       when "COS"
+         cosinus(tab.to_matrix)
+       when "SIN"
+         sinus(tab.to_matrix)
+       when "EXP"
+         expo(tab.to_matrix)
+       when "SINH"
+         sinush(tab.to_matrix)
+       when "COSH"
+         cosinush(tab.to_matrix)
+       when "LN-"
+         ln_min(tab.to_matrix)
+       when "LN+"
+         ln_plus(tab.to_matrix)
+       when "1/X-"
+         inverse_min(tab.to_matrix)
+       when "1/X+"
+         inverse_plus(tab.to_matrix)
+       else
+         STDERR.puts "Wrong usual function"
+         exit 84
+       end
+  exit 0
+end

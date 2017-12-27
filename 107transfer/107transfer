@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+class Polynomial
+  attr_accessor :coefficients
+  
+  def initialize(coefficients)
+    self.coefficients = coefficients
+  end
+  
+  def evaluate(x)
+    coefficients.map.with_index { |k, power| k * (x**power) }.reduce(0, :+)
+  end
+end
+
+@test = Hash.new()
+ARGV << '-h' if ARGV.empty?
+if ARGV[0] == '-h'
+  STDERR.puts "USAGE"
+  STDERR.puts "\t./107transfer [num den]\n"
+  STDERR.puts "DESCRIPTION"
+  STDERR.puts "\tnum\tpolynomial numerator defined by its coeficients"
+  STDERR.puts "\tden\tpolynomial denominator defined by its coeficients"
+  exit 84
+else
+  for i in 0...ARGV.length
+    @test[i] = Polynomial.new(ARGV[i].split("*").map { |s| s.to_i})
+    lol = ARGV[i].split('*').map { |s| s.to_i}
+  end
+
+  for @x in (0..1).step(0.001) do
+    @j = 1
+    @test.each { |i, j|
+      if (i % 2 == 0)
+        @j *= @test[i].evaluate(@x);
+      else
+        @j /= @test[i].evaluate(@x);
+      end
+    }
+    print "%.3f->" % @x
+    print "%.5f\n" % @j
+  end
+  exit 0
+end

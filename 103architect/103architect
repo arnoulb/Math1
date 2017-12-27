@@ -1,0 +1,133 @@
+#!/usr/bin/env python2.7
+## test.py for  in /home/daelomin/test
+## 
+## Made by Arnould Jean-Michel
+## Login   <daelomin@epitech.net>
+## 
+## Started on  Sat Dec 26 21:09:52 2015 Arnould Jean-Michel
+## Last update Wed Jan  6 14:31:17 2016 Arnould Jean-Michel
+##
+
+import sys, math
+
+if len(sys.argv) < 5:
+    print "USAGE:"
+    print "\t./103architect x y transfo1 arg11 [arg12] [transfor2 arg12 [arg22]]"
+    print "DESCRIPTION"
+    print "\tx\tabscissa of the original point"
+    print "\ty\tordinate of the original point"
+    print "transo arg1 [arg2]"
+    print "\t-t i j\ttranslation along the coordinate vector (i,j)"
+    print "\t-h m n\thomothety with center 0 and scale factors m along x-axis and n along y-axis"
+    print "\t-r a\trotation centered in O at angle a degrees"
+    print "\t-s a\tsymmetry about the axis passing by 0 and inclined with an a-degree angle"
+
+    exit(84)
+
+def isnum(value):
+    return str(value).replace(".", "").replace("-", "").isdigit()
+
+def prod_matrix(matrix, matrix2):
+    matrix0 = matrix
+    matrix[0] = matrix0[0] * matrix2[0] + matrix0[1] * matrix2[3] + matrix0[2] * matrix2[6]
+    matrix[1] = matrix0[0] * matrix2[1] + matrix0[1] * matrix2[4] + matrix0[2] * matrix2[7]
+    matrix[2] = matrix0[0] * matrix2[2] + matrix0[1] * matrix2[5] + matrix0[2] * matrix2[8]
+    matrix[3] = matrix0[3] * matrix2[0] + matrix0[4] * matrix2[3] + matrix0[5] * matrix2[6]
+    matrix[4] = matrix0[3] * matrix2[1] + matrix0[4] * matrix2[4] + matrix0[5] * matrix2[7]
+    matrix[5] = matrix0[3] * matrix2[2] + matrix0[4] * matrix2[5] + matrix0[5] * matrix2[8]
+    matrix[6] = matrix0[6] * matrix2[0] + matrix0[7] * matrix2[3] + matrix0[8] * matrix2[6]
+    matrix[7] = matrix0[6] * matrix2[1] + matrix0[7] * matrix2[4] + matrix0[8] * matrix2[7]
+    matrix[8] = matrix0[6] * matrix2[2] + matrix0[7] * matrix2[5] + matrix0[8] * matrix2[8]
+    return matrix
+
+
+class Architect(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.res_x = x
+        self.res_y = y
+        self.matrix = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+    def rotation(self, beta):
+        self.beta = beta
+        angle = math.radians(beta) #(beta * math.pi) / 180
+        rx = math.cos(angle)
+        ry = math.sin(angle)
+        matrixr = [rx, -ry, 0, ry, rx, 0, 0, 0, 1]
+        tmp1 = self.res_x
+        self.res_x = tmp1 * matrixr[0] + self.res_y *  matrixr[1]
+        self.res_y = tmp1 * matrixr[3] + self.res_y *  matrixr[4]
+        self.matrix = prod_matrix(matrixr, self.matrix)
+        return "Rotation at a %d degree angle" % (beta)
+
+    def homothetie(self, i, j):
+        self.res_x = self.res_x * i
+        self.res_y = self.res_y * j
+        matrixh = [i, 0, 0, 0, j, 0, 0, 0, 1]
+        self.matrix[0] = self.matrix[0] * i
+        self.matrix[1] = self.matrix[1] * i
+        self.matrix[2] = self.matrix[2] * i
+        self.matrix[3] = self.matrix[3] * j
+        self.matrix[4] = self.matrix[4] * j
+        self.matrix[5] = self.matrix[5] * j
+        return "Homothety by the ratios %d and %d" % (i, j)
+
+    def symetrie(self, alpha):
+        self.alpha = alpha
+        angle = math.radians(alpha) * 2 #(alpha * math.pi) / 90
+        sx = math.cos(angle)
+        sy = math.sin(angle)
+        matrixs = [sx, sy, 0, sy, -sx, 0, 0, 0, 1]
+        tmp = self.res_x
+        self.res_x = tmp * matrixs[0] + self.res_y *  matrixs[1]
+        self.res_y = tmp * matrixs[3] + self.res_y *  matrixs[4]
+        self.matrix = prod_matrix(matrixs, self.matrix)
+        return "Symmetry about an axis inclined with an angle of %d degrees" % (alpha)
+
+    def translation(self, m, n):
+        self.res_x = self.res_x + m
+        self.res_y = self.res_y + n
+        self.matrix[2] = self.matrix[2] + m
+        self.matrix[5] = self.matrix[5] + n
+        return "Translation by the vector (%d,%d)" % (m, n)
+
+    def __repr__(self):
+        return "%.2lf\t%.2lf\t%.2lf\n%.2lf\t%.2lf\t%.2lf\n%.2lf\t%.2lf\t%.2lf\n(%d,%d) => (%.2lf,%.2lf)" % (self.matrix[0], self.matrix[1],self.matrix[2],self.matrix[3],self.matrix[4],self.matrix[5],self.matrix[6],self.matrix[7],self.matrix[8], self.x, self.y, self.res_x, self.res_y)
+    
+var = Architect(int(sys.argv[1]), int(sys.argv[2]))
+
+for i in range(3, len(sys.argv)):
+    if sys.argv[i] == '-t':
+        if i + 2 < len(sys.argv) and isnum(sys.argv[i + 1]) and isnum(sys.argv[i + 2]):
+            print var.translation(int(sys.argv[i + 1]), int(sys.argv[i + 2]))
+        else:
+            print "usage : ./103architect x y transfo1 arg11 [arg12] [transfor2 arg12 [arg22]]"
+            print "argument -t shall be followed by 2 numbers"
+            exit(84)
+    elif sys.argv[i] == '-h':
+        if i + 2 < len(sys.argv) and isnum(sys.argv[i + 1]) and isnum(sys.argv[i + 2]):
+            print var.homothetie(int(sys.argv[i + 1]), int(sys.argv[i + 2]))
+        else:
+            print "usage : ./103architect x y transfo1 arg11 [arg12] [transfor2 arg12 [arg22]]"
+            print "argument -h shall be followed by 2 numbers"
+            exit(84)
+    elif sys.argv[i] == '-s':
+        if i + 1 < len(sys.argv) and isnum(sys.argv[i + 1]):
+            print var.symetrie(int(sys.argv[i + 1]))
+        else:
+            print "usage : ./103architect x y transfo1 arg11 [arg12] [transfor2 arg12 [arg22]]"
+            print "argument -s shall be followed by 1 number"
+            exit(84)
+    elif sys.argv[i] == '-r':
+        if i + 1 < len(sys.argv) and isnum(sys.argv[i + 1]):
+            print var.rotation(int(sys.argv[i + 1]))
+        else:
+            print "usage : ./103architect x y transfo1 arg11 [arg12] [transfor2 arg12 [arg22]]"
+            print "argument -r shall be followed by 1 number"
+            exit(84)
+    else:
+        pass
+
+print var
+exit(0)

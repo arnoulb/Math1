@@ -1,0 +1,189 @@
+#!/usr/bin/env ruby
+
+#require 'nyaplot'
+#include Nyaplot
+
+class Object
+  def is_num?
+    self.to_f.to_s == self.to_s || self.to_i.to_s == self.to_s
+  end
+end
+
+def read_file(file_name)
+  file = File.open(file_name, "r")
+  data = file.read
+  file.close
+  return (data)
+end
+
+ARGV << '-h' if ARGV.empty?
+if ARGV[0] == '-h'
+  STDERR.puts "USAGE"
+  STDERR.puts "\t./109titration file\n"
+  STDERR.puts "DESCRIPTION"
+  STDERR.puts "\tfile\tacsv containing \"vol;ph\" lines"
+  exit 84
+else
+  if (File.exist?(ARGV[0]))
+    data = read_file(ARGV[0]).split("\n")
+    first = Hash.new()
+    tmp = Hash.new()
+    tmp2 = Hash.new()
+    data.each { |n| j = n.split(";"); first[j[0]] = j[1]}
+    first = first.to_a
+
+    first.each { |n|
+      n.each { |x|
+        if not x.is_num?
+          STDERR.puts "Wrong value in #{ARGV[0]} file : #{x}"
+          exit 84;
+        end
+      };
+    }
+    max = (first[2][1].to_f - first[0][1].to_f) / (first[2][0].to_f - first[0][0].to_f)
+    index = 1
+    puts "Derivative:"
+    for i in 1...first.length - 1
+      dpH = (first[i+1][1].to_f - first[i-1][1].to_f) / (first[i+1][0].to_f - first[i-1][0].to_f)
+      tmp[first[i][0]] = dpH.round(2)
+      if (dpH > max)
+        max = dpH
+        index = i
+      end
+      puts "volume: #{first[i][0]} ml -> %.2f" % dpH
+    end
+    puts "\nEquivalent point at #{first[index][0]} ml"
+    puts "\nSecond derivative:"
+
+    tmp = tmp.to_a
+    max = (tmp[2][1].to_f - tmp[0][1].to_f) / (tmp[2][0].to_f - tmp[0][0].to_f)
+    index = 1
+    for i in 1...tmp.length - 1
+      dpH = (tmp[i+1][1].to_f - tmp[i-1][1].to_f) / (tmp[i+1][0].to_f - tmp[i-1][0].to_f)
+      tmp2[tmp[i][0]] = dpH.round(2)
+      if (dpH > max)
+        max = dpH
+        index = i
+      end
+      puts "volume: #{tmp[i][0]} ml -> %.2f" % dpH
+    end
+    tmp2 = tmp2.to_a
+    for i in index...tmp2.length - 1
+      break if tmp2[i][1] < 0
+    end
+    res = Array.new()
+    
+    if i + 1 < tmp2.length
+      puts "\nSecond derivative estimated:"
+      yA = tmp2[i-1][1].to_f
+      yB = tmp2[i][1].to_f
+      xA = tmp2[i-1][0].to_f
+      xB = tmp2[i][0].to_f
+      a = ((yB-yA) / (xB-xA))
+      b = (a * xB - yB)
+
+      min = a * xA - b
+      index = xA
+
+      int = []
+      zero = []
+      for x in (tmp2[i-1][0].to_f...tmp2[i][0].to_f).step(0.1)
+        int.push(x)
+        zero.push(0)
+      end
+      for x in (tmp2[i-1][0].to_f...tmp2[i][0].to_f).step(0.1)
+        res.push(a * x - b)
+        if (a * x - b) < min && (a * x - b) >= 0
+          min = a * x - b
+          index = x
+        end
+        puts "volume: #{x} ml -> %.2f" % (a * x - b)
+      end
+
+      yA = tmp2[i][1].to_f
+      yB = tmp2[i+1][1].to_f
+      xA = tmp2[i][0].to_f
+      xB = tmp2[i+1][0].to_f
+      a = ((yB-yA) / (xB-xA))
+      b = (a * xB - yB)
+      for x in (tmp2[i][0].to_f..tmp2[i+1][0].to_f).step(0.1)
+        res.push(a * x - b)
+        if (a * x - b) < min && (a * x - b) >= 0
+          min = a * x - b
+          index = x
+        end
+        puts "volume: #{x} ml -> %.2f" % (a * x - b)
+      end
+
+      puts "\nEquivalent point at #{index} ml"
+
+      k = Array.new()
+      l = Array.new()
+
+      i = 0;
+      first.each { |x|
+        x.each { |n|
+          k.push(n.to_f) if i % 2 == 0;
+          l.push(n.to_f) if i % 2 == 1;
+          i += 1;}
+      }
+
+      test = 0;
+=begin
+      ARGV.each { |x| test = 1 if x == "--graph" }
+      if (test == 1)
+        plot = Plot.new()
+        plot.x_label("Volume (mL)")
+        plot.y_label("pH")
+        plot2 = Plot.new
+        plot2.x_label("Volume (mL)")
+        plot2.y_label("pH")
+        plot3 = Plot.new
+        plot3.x_label("Volume (mL)")
+        plot3.y_label("pH")
+        sc = plot.add(:line, k,l)
+        sc = plot.add(:scatter, k,l)
+        l = []
+        k = []
+        tmp.each { |x|
+          x.each { |n|
+            k.push(n.to_f) if i % 2 == 0;
+            l.push(n.to_f) if i % 2 == 1;
+            i += 1;}
+        }
+        
+        sc2 = plot2.add(:line, k,l)
+        sc2 = plot2.add(:scatter, k,l)
+        sc3 = plot3.add(:line, int,res)
+        sc3 = plot3.add(:scatter, int,res)
+        sc3 = plot3.add(:line, int, zero)
+        plot.legend(true);
+        plot2.legend(true);
+        plot3.legend(true);
+        plot.export_html("Titration.html");
+        plot2.export_html("First_Derivative.html");
+        plot3.export_html("Second_Derivative.html");
+      end
+=end
+    end
+    test = 0;
+    value = 0;
+    ARGV.each { |x|
+      if x.match('--C=')
+        test = 1;
+        value = x.split("=")[1].to_f;
+      end;
+    }
+    
+    if (test == 1)
+      puts first.last[0]
+      C = (value * index) / first.last[0].to_f
+      M = 122
+      puts "Acide benzoic concentration : %f mol/L" % C;
+    end
+    exit 0
+  else
+    STDERR.puts "File #{ARGV[0]} doesn't exist !"
+    exit 84
+  end
+end

@@ -1,0 +1,76 @@
+#!/usr/bin/env python2.7
+## 105torus.py for  in /home/daelomin/rendu/Maths/105torus
+## 
+## Made by Arnould Jean-Michel
+## Login   <daelomin@epitech.net>
+## 
+## Started on  Tue Jan 26 16:32:55 2016 Arnould Jean-Michel
+## Last update Tue Jan 26 16:44:46 2016 Arnould Jean-Michel
+##
+
+import sys, math, decimal
+
+if len(sys.argv) != 8:
+    print "USAGE:"
+    print "\t./105torus opt a0 a1 a2 a3 a4 n"
+    print "DESCRITPION"
+    print "\topt\tnumber of the option :"
+    print "\t\t\t1 for the bisection method"
+    print "\t\t\t2 for the Newton's method"
+    print "\t\t\t3 for the secant method"
+    print "\ta0,a1,a2,a3,a4\tcoefficients of the equation"
+    print "\tn\tprecision"
+    exit(84)
+
+def isnum(value):
+    return str(value).replace(".","").replace("-", "").isdigit()
+
+for i in range(1, 8):
+    if (isnum(sys.argv[i])):
+        pass
+    else:
+        sys.stderr.write("Wrong argument(s) :\n")
+        for i in range(1, 8):
+            if (isnum(sys.argv[i])):
+               pass
+            else:
+                sys.stderr.write("Argument number %d -> %s\n" % (i, sys.argv[i]))
+        exit(84)
+
+def bisection(a, b, c, d, e, n):
+    
+    print "bisection"
+
+def newton(a, b, c, d, e, n):
+    x1 = 0.5
+    print "x = %lf" % (x1)
+    for i in range(1, 200):
+        fx = (a * math.pow(x1, 4.0)) + (b * math.pow(x1, 3.0)) + (c * math.pow(x1, 2.0)) + (d * x1) + e
+        dx = (4 * (a * math.pow(x1, 3.0))) + (3 * (b * math.pow(x1, 2.0))) + (2 * c * x1) + x1
+        if dx == 0:
+            sys.stderr.write("Division by zero, abort\n")
+            exit(84)
+        x2 = x1 - (fx / dx)
+        if round(x1, n) == round(x2, n):
+            print "f(x): %.1e" % (f2)
+            exit(0)
+        f2 = (a * math.pow(x2, 4.0)) + (b * math.pow(x2, 3.0)) + (c * math.pow(x2, 2.0)) + (d * x2) + e
+        print "x = %f" % (x2)
+        x1 = x2
+#        print "newton"
+
+def secant(a, b, c, d, e, n):
+    print "secant"
+
+if sys.argv[1] == "1":
+    bisection(float(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]))
+    exit(0)
+elif sys.argv[1] == "2":
+    newton(float(sys.argv[6]), float(sys.argv[5]), float(sys.argv[4]), float(sys.argv[3]), float(sys.argv[2]), int(sys.argv[7]))
+    exit(0)
+elif sys.argv[1] == "3":
+    secant(float(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]))
+    exit(0)
+else:
+    sys.stderr.write("Wrong option\nEnter '1' for the bissection method, '2' for Newton's method, '3' for the secant method.\n")
+    exit(84)

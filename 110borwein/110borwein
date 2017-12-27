@@ -1,0 +1,90 @@
+#!/usr/bin/env ruby
+class Object
+  def is_num?
+    self.to_f.to_s == self.to_s || self.to_i.to_s == self.to_s
+  end
+end
+
+def fonction(x, n)
+  res = 1;
+  for i in 0..n
+    if (x != 0)
+      res *= (Math.sin(x / ((2 * i) + 1)) / (x / ((2 * i) + 1)))
+    end
+  end
+  return res
+end
+
+def rectangle(value)
+  min = 0;
+  max = 10000;
+  res = 0;
+
+  for i in min...max
+    res += fonction(i * 0.5, value)
+  end
+  res *= 0.5
+  puts "Rectangles:"
+  puts "I#{ARGV[0]} = %.10f" % res
+  puts "diff = %.10f" % (res - (Math::PI / 2))
+end
+
+def trapeze(value)
+  min = 1
+  max = 10000
+  res = 0
+
+  for i in min...max
+    res += fonction(i * 0.5, value)
+  end
+
+  res = ((res * 2) + fonction(0, value) + fonction(max / 2, value)) / 4
+  puts "Trapezoids:"
+  puts "I#{ARGV[0]} = %.10f" % res
+  puts "diff = %.10f" % (res - (Math::PI / 2))
+end
+
+def simpson(value)
+  min = 1
+  max = 10000
+  tmp = 0
+  tmp2 = 0
+  res = 0
+
+  for i in min...max
+    tmp += fonction(i * 0.5, value)
+  end
+  for i in 0...max
+    tmp2 += fonction((i * 0.5) + 0.25, value)
+  end
+
+  res = ((tmp * 2) + (tmp2 * 4) + fonction(0, value) + fonction(max / 2, value)) / 12
+  puts "Simpson:"
+  puts "I#{ARGV[0]} = %.10f" % res
+  puts "diff = %.10f" % (res - (Math::PI / 2))
+end
+
+ARGV << '-h' if ARGV.empty?
+if ARGV[0] == '-h'
+  STDERR.puts "USAGE"
+  STDERR.puts "\t./110borwein n\n"
+  STDERR.puts "DESCRIPTION"
+  STDERR.puts "\tn\tconstant defining the integral to be computed"
+  exit 84
+else
+  if !ARGV[0].is_num?
+    STDERR.print "Wrong argument : #{ARGV[0]} is not a number\n"
+    exit 84
+  elsif ARGV[0].to_f < 0
+    STDERR.print "Wrong argument : #{ARGV[0]} must be a positive number\n"
+    exit 84
+  else
+
+    rectangle(ARGV[0].to_f)
+    print "\n"
+    trapeze(ARGV[0].to_f)
+    print "\n"
+    simpson(ARGV[0].to_f)
+    exit 0
+  end
+end
